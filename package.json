@@ -37,6 +37,7 @@
     "botgpt": "index.js"
   },
   "dependencies": {
+    "figlet": "^1.5.2",
     "openai": "^3.2.1"
   }
 }

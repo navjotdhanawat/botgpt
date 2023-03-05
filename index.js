@@ -1,119 +1,139 @@
+#!/usr/bin/env node
+
 import readline from "readline";
 import { Configuration, OpenAIApi } from "openai";
-import { Loader } from "./util.mjs";
-import CLI from "./cli.mjs";
+import { hideLoader, showLoader } from "./utils.mjs";
+import { initCli, clearCredentials } from "./cli.mjs";
+import figlet from "figlet";
 
-const cli = new CLI();
+const model = "gpt-3.5-turbo";
+const credentials = await initCli();
 
-class ChatBot {
-  constructor() {
-    this.credentials = null;
-    this.configuration = null;
-    this.openai = null;
-    this.messages = [];
-    this.rl = null;
-    this.loader = null;
+const configuration = new Configuration({
+  apiKey: credentials?.apiKey,
+});
+const openai = new OpenAIApi(configuration);
+
+let messages = [];
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+rl.on("line", (input) => {
+  generateResponse(input);
+});
+
+// Listen for the keypress event on the stdin stream
+process.stdin.on("keypress", (key, info) => {
+  if (info.ctrl && info.name === "r") {
+    messages = [];
   }
+});
 
-  async init() {
-    this.loader = new Loader();
-    this.credentials = await cli.init();
-    this.configuration = new Configuration({
-      apiKey: this.credentials?.apiKey,
-    });
-    this.openai = new OpenAIApi(this.configuration);
-    this.rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
+// Enable listening for keys on the stdin stream
+process.stdin.setRawMode(true);
+process.stdin.resume();
 
-    this.rl.on("line", (input) => {
-      this.generateResponse(input);
-    });
+process.stdout.write(
+  `${figlet.textSync("BOT GPT", {
+    font: "Delta Corps Priest 1",
+    horizontalLayout: "default",
+    verticalLayout: "default",
+    width: 100,
+    whitespaceBreak: true,
+  })}\n`
+);
+process.stdout.write(
+  `${figlet.textSync("Welcome to Chat GPT CLI Bot  ", {
+    font: "Calvin S",
+    horizontalLayout: "fitted",
+    verticalLayout: "fitted",
+    width: 100,
+    whitespaceBreak: true,
+  })}\n`
+);
 
-    this.generateResponse(
-      `My name is ${this.credentials.username}. Please act as my personal assistant. Start conversation with "Hello [MY_NAME], How can I assist you today?"`
+async function generateResponse(input) {
+  if (!input) {
+    rl.prompt(true);
+    return;
+  }
+  messages.push({
+    role: "user",
+    content: input,
+  });
+  try {
+    showLoader();
+    const res = await openai.createChatCompletion(
+      {
+        model,
+        messages,
+        // temperature: 0.5,
+        max_tokens: 500,
+        // top_p: 1,
+        // frequency_penalty: 0,
+        // presence_penalty: 0.6,
+        // stop: ["\n"],
+        stream: true,
+      },
+      { responseType: "stream" }
     );
-  }
 
-  async generateResponse(input) {
-    this.messages.push({
-      role: "user",
-      content: input,
+    hideLoader();
+    process.stdout.write(`Bot: `);
+    let response;
+    res.data.on("data", (data) => {
+      const lines = data
+        .toString()
+        .split("\n")
+        .filter((line) => line.trim() !== "");
+
+      for (const line of lines) {
+        const message = line.replace(/^data: /, "");
+        if (message === "[DONE]") {
+          messages.push({
+            role: "system",
+            content: response,
+          });
+          process.stdout.write(`\n`);
+          rl.prompt(true);
+          return; // Stream finished
+        }
+        try {
+          const chunk = JSON.parse(message).choices[0].delta.content || "";
+          if (chunk === "\n\n") continue;
+
+          response += chunk;
+          process.stdout.write(`\x1b[31m${chunk}\x1b[0m`);
+        } catch (error) {
+          console.error("Could not JSON parse stream message", message, error);
+        }
+      }
     });
-
-    try {
-      this.loader.show();
-      const res = await this.openai.createChatCompletion(
-        {
-          model: "gpt-3.5-turbo",
-          messages: this.messages,
-          // temperature: 0.5,
-          max_tokens: 500,
-          // top_p: 1,
-          // frequency_penalty: 0,
-          // presence_penalty: 0.6,
-          // stop: ["\n"],
-          stream: true,
-        },
-        { responseType: "stream" }
-      );
-
-      this.loader.hide();
-      let response;
-      res.data.on("data", (data) => {
-        const lines = data
-          .toString()
-          .split("\n")
-          .filter((line) => line.trim() !== "");
-
-        for (const line of lines) {
-          const message = line.replace(/^data: /, "");
-          if (message === "[DONE]") {
-            this.messages.push({
-              role: "system",
-              content: response,
-            });
-            process.stdout.write(`\n`);
-            this.rl.prompt(true);
-            return; // Stream finished
-          }
-          try {
-            const chunk = JSON.parse(message).choices[0].delta.content || "";
-            response += chunk;
-            process.stdout.write(`\x1b[31m${chunk}\x1b[0m`);
-          } catch (error) {
-            console.error(
-              "Could not JSON parse stream message",
-              message,
-              error
-            );
-          }
+  } catch (error) {
+    hideLoader();
+    if (error.response?.status) {
+      console.error(error.response.status, error.message);
+      if (error.response.status === 401) {
+        clearCredentials();
+      }
+      error.response.data.on("data", (data) => {
+        const message = data.toString();
+        try {
+          const parsed = JSON.parse(message);
+          console.error("An error occurred during OpenAI request: ", parsed);
+        } catch (error) {
+          console.error("An error occurred during OpenAI request: ", message);
         }
       });
-    } catch (error) {
-      this.loader.hide();
-      if (error.response?.status) {
-        console.error(error.response.status, error.message);
-        if (error.response.status === 401) {
-          cli.clearCredentials();
-        }
-        error.response.data.on("data", (data) => {
-          const message = data.toString();
-          try {
-            const parsed = JSON.parse(message);
-            console.error("An error occurred during OpenAI request: ", parsed);
-          } catch (error) {
-            console.error("An error occurred during OpenAI request: ", message);
-          }
-        });
-      } else {
-        console.error("An error occurred during OpenAI request", error);
-      }
-      process.exit();
+    } else {
+      console.error("An error occurred during OpenAI request", error);
     }
+    process.exit();
   }
 }
 
-const bot = new ChatBot();
-bot.init();
+generateResponse(
+  `My name is ${credentials.username}. Please act as my personal assistant. Start conversation with "Hello [MY_NAME], How can I assist you today?"`
+);
