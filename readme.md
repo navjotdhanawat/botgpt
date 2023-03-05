@@ -1,8 +1,11 @@
-## Open AI: GPT CLI Chat bot
+<h2 align="center">
+Chat GPT CLI bot
+<h2>
 
 <p align="center">
   <img src="logo.png" width="40%" height="40%" />
 </p>
+
 ### How to use:
 
 #### Install
