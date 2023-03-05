@@ -1,30 +1,42 @@
-let interval;
+class Loader {
+  constructor() {
+    this.interval = null;
+  }
 
-export const showLoader = () => {
-  let count = 0;
+  show() {
+    let count = 0;
 
-  interval = setInterval(() => {
-    process.stdout.write(`\r${".".repeat(count)}`);
-    count = (count + 1) % 4;
-  }, 500);
-};
+    this.interval = setInterval(() => {
+      process.stdout.write(`\r${".".repeat(count)}`);
+      count = (count + 1) % 4;
+    }, 500);
+  }
 
-export const hideLoader = () => {
-  clearInterval(interval);
-  process.stdout.write("\r \r");
-};
+  hide() {
+    clearInterval(this.interval);
+    process.stdout.write("\r \r");
+  }
+}
 
-export const initMessage = (message) => {
-  let index = 0;
-  const typeMessage = () => {
-    process.stdout.write(message[index]);
-    index++;
+class Message {
+  constructor() {
+    this.index = 0;
+    this.intervalId = null;
+  }
 
-    if (index === message.length) {
-      process.stdout.write("\n");
-      clearInterval(intervalId);
-    }
-  };
+  init(message) {
+    const typeMessage = () => {
+      process.stdout.write(message[this.index]);
+      this.index++;
 
-  const intervalId = setInterval(typeMessage, 50);
-};
+      if (this.index === message.length) {
+        process.stdout.write("\n");
+        clearInterval(this.intervalId);
+      }
+    };
+
+    this.intervalId = setInterval(typeMessage, 50);
+  }
+}
+
+export { Loader, Message };
