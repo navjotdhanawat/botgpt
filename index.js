@@ -1,8 +1,7 @@
 import readline from "readline";
-import fs from "fs";
 import { Configuration, OpenAIApi } from "openai";
 import { Loader } from "./util.mjs";
-import CLI from "./init.mjs";
+import CLI from "./cli.mjs";
 
 const cli = new CLI();
 
