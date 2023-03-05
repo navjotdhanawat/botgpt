@@ -1,7 +1,7 @@
 ## Open AI: GPT CLI Chat bot
 
 <p align="center">
-  <img src="icon.png" width="40%" height="40%" />
+  <img src="logo.png" width="40%" height="40%" />
 </p>
 ### How to use:
 
