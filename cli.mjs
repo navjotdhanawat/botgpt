@@ -36,10 +36,7 @@ const initCli = async () => {
         credentials[question.id] || question.defaultAnswer;
 
       const answer = await new Promise((resolve) => {
-        rl.question(
-          `${question.text} \x1b[31m (${credentialsValue})\x1b[0m `,
-          resolve
-        );
+        rl.question(`\x1b[31m ${question.text}\x1b[0m `, resolve);
       });
 
       credentials[question.id] = answer;
