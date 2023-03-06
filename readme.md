@@ -28,6 +28,15 @@ npx botgpt
 
 _Note: Please make sure you have [nodejs](https://nodejs.org/) installed_
 
+#### Development
+
+```
+git clone https://github.com/navjotdhanawat/botgpt.git
+cd botgpt
+npm i
+npm start
+```
+
 ### How to get OpenAI API Key:
 
 This guide provides step-by-step instructions on how to obtain an API key for OpenAI's services.
