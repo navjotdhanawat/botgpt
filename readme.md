@@ -3,7 +3,7 @@ Chat GPT CLI bot
 <h2>
 
 <p align="center">
-  <img src="logo.png" width="40%" height="40%" />
+  <img src="https://raw.githubusercontent.com/navjotdhanawat/botgpt/main/logo.png" width="40%" height="40%" />
 </p>
 
 ### How to use:
