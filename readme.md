@@ -5,6 +5,8 @@ Chat GPT CLI bot
 <p align="center">
   <img src="https://raw.githubusercontent.com/navjotdhanawat/botgpt/main/logo.png" width="40%" height="40%" />
 </p>
+  
+[![botgpt-intro.gif](https://s2.gifyu.com/images/botgpt-intro.gif)](https://gifyu.com/image/S7Cfz)
 
 ### How to use:
 
