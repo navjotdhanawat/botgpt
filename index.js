@@ -5,9 +5,13 @@ import { Configuration, OpenAIApi } from "openai";
 import { hideLoader, showLoader } from "./utils.mjs";
 import { initCli, clearCredentials } from "./cli.mjs";
 import figlet from "figlet";
+import path from "path";
+import os from "os";
+
+const filepath = path.join(os.tmpdir(), "settings.json");
 
 const model = "gpt-3.5-turbo";
-const credentials = await initCli();
+const credentials = await initCli(filepath);
 
 const configuration = new Configuration({
   apiKey: credentials?.apiKey,

@@ -2,10 +2,7 @@ import fs from "fs";
 import readline from "readline";
 import { once } from "events";
 
-// Define the path to the file where the user input will be stored
-const filePath = "./storage.json";
-
-const initCli = async () => {
+const initCli = async (filePath) => {
   // Define the list of questions and their default answers
   const questions = [
     { id: "username", text: "What is your name?", defaultAnswer: "" },
