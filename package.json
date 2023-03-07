@@ -1,6 +1,6 @@
 {
   "name": "botgpt",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "BotGPT is cli bot based on Open AI GPT model. It is using gpt-3.5-turbo gpt model. It is based on ChatCompletion method with steam output like chat GPT",
   "main": "index.js",
   "type": "module",
