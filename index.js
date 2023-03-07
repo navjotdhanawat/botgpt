@@ -120,7 +120,7 @@ async function generateResponse(input) {
     if (error.response?.status) {
       console.error(error.response.status, error.message);
       if (error.response.status === 401) {
-        clearCredentials();
+        clearCredentials(filepath);
       }
       error.response.data.on("data", (data) => {
         const message = data.toString();
